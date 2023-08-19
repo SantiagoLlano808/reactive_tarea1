@@ -3,6 +3,8 @@ package edu.co.reactivo.tarea1.service;
 
 import edu.co.reactivo.tarea1.model.Producto;
 import edu.co.reactivo.tarea1.repository.ProductoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,6 +16,8 @@ import java.util.Optional;
 @Service
 public class ProductoService {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(ProductoKafkaConsumerService.class);
+
     private final ProductoRepository productoRepository;
 
     public ProductoService(ProductoRepository productoRepository) {
@@ -22,6 +26,7 @@ public class ProductoService {
     public Mono<Producto> findById(Integer id) {
         return productoRepository.findById(id)
                 .onErrorResume(throwable -> {
+                    LOGGER.error("Error al consultar el producto con id: " + id, throwable);
                     return Mono.empty();
                 })
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -31,6 +36,7 @@ public class ProductoService {
     public Flux<Producto> findAll() {
         return productoRepository.findAll()
                 .onErrorResume(throwable -> {
+                    LOGGER.error("Error al consultar todos los productos", throwable);
                     return Mono.empty();
                 })
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -40,6 +46,7 @@ public class ProductoService {
     public Mono<Producto> save(Producto producto) {
             return productoRepository.save(producto)
                     .onErrorResume(throwable -> {
+                        LOGGER.error("Error al crear un Producto: " + producto, throwable);
                         return Mono.empty();
                     })
                     .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -61,6 +68,7 @@ public class ProductoService {
                         producto.setCantidadInventario(optionalProducto.get().getCantidadInventario());
                         return productoRepository.save(producto)
                                 .onErrorResume(throwable -> {
+                                    LOGGER.error("Error al actualizar el Producto: " + producto, throwable);
                                     return Mono.empty();
                                 })
                                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -74,13 +82,20 @@ public class ProductoService {
         return productoRepository.findById(id)
                 .flatMap(producto -> productoRepository.deleteById(producto.getId()).thenReturn(producto))
                 .onErrorResume(throwable -> {
+                    LOGGER.error("Error al borrar el producto con Id: " + id, throwable);
                     return Mono.empty();
                 })
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Producto con Id=" + id +" no borrado").getMostSpecificCause()));
     }
     public Mono<Void> deleteAll() {
-        return productoRepository.deleteAll();
+        return productoRepository.deleteAll()
+                .onErrorResume(throwable -> {
+                    LOGGER.error("Error al borrar los productos", throwable);
+                    return Mono.empty();
+                })
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Productos no borrados").getMostSpecificCause()));
     }
 
 }
