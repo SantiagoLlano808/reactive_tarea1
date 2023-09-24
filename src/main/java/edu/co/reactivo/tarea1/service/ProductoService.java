@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -97,5 +98,17 @@ public class ProductoService {
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Productos no borrados").getMostSpecificCause()));
     }
+
+    public Flux<Producto> findByActivo(Boolean activo) {
+        return productoRepository.findByActivo(activo)
+                .onErrorResume(throwable -> {
+                    LOGGER.error("Error al buscar productos activos: " + activo, throwable);
+                    return Mono.empty();
+                })
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Productos con activo=" + activo +" no encontrados").getMostSpecificCause()));
+    }
+
+
 
 }

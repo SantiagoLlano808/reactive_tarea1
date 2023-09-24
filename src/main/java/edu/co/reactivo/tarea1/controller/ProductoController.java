@@ -58,6 +58,16 @@ public class ProductoController {
         return productoService.deleteAll();
     }
 
+    @GetMapping("/activos")
+    public Flux<Producto> getProductossActivos() {
+        return productoService.findByActivo(Boolean.TRUE);
+    }
+
+    @GetMapping("/inactivos")
+    public Flux<Producto> getCreditosInactivos() {
+        return productoService.findByActivo(Boolean.FALSE);
+    }
+
     @GetMapping("/topico-kakfa/{topico}")
     public Mono<String> getProductoFromTopicoKafka(@PathVariable String topico) {
         return Mono.just(productoKafkaConsumerService.obtenerUltimoProducto(topico));
@@ -76,11 +86,11 @@ public class ProductoController {
                 producto));
     }
 
-    @PostMapping("/aws/processCreditoByDescripcion")
-    public Mono<Producto> deleteCreditoFromQueueByDescripcion(@RequestBody Map<String, Object> requestBody){
+    @PostMapping("/aws/processProductoByDescripcion")
+    public Mono<Producto> deleteProductoFromQueueByDescripcion(@RequestBody Map<String, Object> requestBody){
         return productoSQSService.deleteProductoMessageInQueue((String) requestBody.get("queueName"),
                 (Integer) requestBody.get("maxNumberMessages"),
                 (Integer) requestBody.get("waitTimeSeconds"),
-                (String) requestBody.get("descripcionCredito"));
+                (String) requestBody.get("descripcionProducto"));
     }
 }

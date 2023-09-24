@@ -28,6 +28,8 @@ dependencies {
 	implementation 'org.springframework.kafka:spring-kafka'
 	implementation 'com.amazonaws:aws-java-sdk:1.12.521'
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'com.amazonaws:aws-java-sdk:1.12.521'
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
